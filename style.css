@@ -21,3 +21,6 @@ body{font-size:18px}p{word-break:normal;overflow-wrap:anywhere}h1,h2,h3{word-bre
 
 .money-flow{display:flex;align-items:center;gap:10px;margin-top:28px;flex-wrap:wrap;font-size:16px}.money-flow span,.money-flow strong{padding:14px 12px;border-bottom:2px solid var(--line);position:relative}.money-flow strong{color:var(--teal);background:var(--soft);font-size:18px}.money-flow strong:after{content:"";position:absolute;inset:auto 0 0;height:3px;background:var(--teal);transform:scaleX(0);transform-origin:left}.money-flow.is-visible strong:after{animation:funds-line 1.2s ease both}.money-flow.is-visible b{animation:operator-in .55s ease both}.money-flow.is-visible b:nth-of-type(2){animation-delay:.35s}@keyframes funds-line{to{transform:scaleX(1)}}@keyframes operator-in{from{transform:scale(.5);opacity:.35}to{transform:scale(1);opacity:1}}.hero-paths a{transition:background .25s,box-shadow .25s}.hero-paths a:hover{box-shadow:inset 0 -5px var(--teal)}
 @media(max-width:760px){.money-flow{gap:5px;font-size:14px}.money-flow span,.money-flow strong{padding:12px 8px}.money-flow strong{font-size:16px}}
+/* Keep the consultation label intact rather than orphaning its final verb. */
+.cta .button{flex-shrink:0;min-width:320px;white-space:nowrap}
+@media(max-width:760px){.cta .button{min-width:0;white-space:normal}.cta .button b{flex-shrink:0}}
