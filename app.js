@@ -1,0 +1,9 @@
+const menu=document.querySelector('.menu'),nav=document.querySelector('#nav');menu.addEventListener('click',()=>{const open=menu.getAttribute('aria-expanded')!=='true';menu.setAttribute('aria-expanded',open);nav.classList.toggle('open',open)});
+const priority={light:['明るさを「時間」で確かめる','窓の大きさだけでなく、普段家にいる時間帯の光の入り方や周囲の建物も見てみましょう。'],work:['集中する場所と休む場所を分ける','部屋数だけでなく、仕事の道具を片付ける場所、生活音の伝わり方、家族の動線を確認してみましょう。'],family:['一緒にいる時間の動線を見る','ダイニングとキッチンのつながり、帰宅時の荷物の置き場など、家族の1日を思い浮かべて歩いてみましょう。']};
+const topic={buy:['希望する暮らしを1つ。','エリア・予算・入居時期が未定でも、今の住まいで変えたいことを整理しておくと、相談の出発点になります。'],sell:['売りたい理由と希望時期を。','住まいの状況、売却を考えたきっかけ、急ぐ事情があるかを整理します。資料がそろっていない場合も、分かることから確認します。'],both:['売却と購入を一緒に整理。','現在の住まいと次の住まい、両方の希望時期を整理します。どちらを先に進めるかは資金や予定によって異なるため、個別に検討します。']};
+function setup(key,data){document.querySelectorAll('[data-'+key+']').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-'+key+']').forEach(x=>x.setAttribute('aria-pressed',x===b));let value=data[b.dataset[key]];document.querySelector('#'+key+'-title').textContent=value[0];document.querySelector('#'+key+'-text').textContent=value[1];let a=b.closest('section').querySelector('.answer');a.classList.remove('switch');requestAnimationFrame(()=>a.classList.add('switch'))}))}setup('priority',priority);setup('topic',topic);document.querySelector('#check')?.addEventListener('click',()=>{const list=document.querySelector('#checklist');list.hidden=!list.hidden;document.querySelector('#check').setAttribute('aria-expanded',!list.hidden)});
+
+// Close the mobile navigation predictably for keyboard users and on layout changes.
+function closeMenu(){menu.setAttribute("aria-expanded","false");nav.classList.remove("open")}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&menu.getAttribute("aria-expanded")==="true"){closeMenu();menu.focus()}});
+window.addEventListener("resize",()=>{if(window.innerWidth>800)closeMenu()});
