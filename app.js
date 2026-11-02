@@ -22,14 +22,14 @@ function animatePanel(element){
 // Every FAQ starts in the same closed state; readers choose what to open.
 document.querySelectorAll('.faq details').forEach(item=>item.removeAttribute('open'));
 nav?.querySelectorAll('a').forEach(link=>link.addEventListener('click',closeMenu));
-const motionTargets=document.querySelectorAll('.split figure,.eyebrow,.cards article,.steps li');
+const motionTargets=document.querySelectorAll('.split figure,.eyebrow,.cards article,.steps li,.money-flow');
 if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
   document.documentElement.classList.add('motion-ready');
   const observer=new IntersectionObserver(entries=>{
     entries.forEach(entry=>{
       if(entry.isIntersecting){entry.target.classList.add('is-visible');observer.unobserve(entry.target)}
     });
-  },{threshold:.12,rootMargin:'0px 0px -15px 0px'});
+  },{threshold:0,rootMargin:'0px 0px 0px 0px'});
   motionTargets.forEach(target=>observer.observe(target));
 }else{
   motionTargets.forEach(target=>target.classList.add('is-visible'));
