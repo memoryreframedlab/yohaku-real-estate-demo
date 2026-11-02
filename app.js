@@ -35,66 +35,16 @@ if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-moti
   motionTargets.forEach(target=>target.classList.add('is-visible'));
 }
 
-// Follow the decision, not a decoration: the selected numbered item stays readable.
-function enhanceDecisionSequence(group,index){
-  const items=[...group.children].filter(item=>item.matches('article,li'));
-  if(items.length<2 || !items.every(item=>item.querySelector('.num') || item.matches('li')&&item.firstElementChild?.matches('span')))return;
-  let userSelected=false,timers=[],selected=-1;
-  const picks=[];
-  const stopTour=()=>{timers.forEach(clearTimeout);timers=[]};
-  function select(position,manual=false){
-    if(manual){userSelected=true;stopTour()}
-    if(selected===position)return;
-    selected=position;
-    group.style.setProperty('--sequence-progress',((position+1)/items.length*100)+'%');
-    group.style.setProperty('--progress-ratio',String(position/(items.length-1)));
-    items.forEach((item,i)=>{
-      item.classList.toggle('decision-active',i===position);
-      item.classList.toggle('decision-passed',i<position);
-      picks[i].setAttribute('aria-pressed',String(i===position));
-    });
-  }
-  items.forEach((item,i)=>{
-    const number=item.querySelector('.num') || item.firstElementChild;
-    const title=item.querySelector('h3')?.textContent || number.textContent;
-    const pick=document.createElement('button');
-    pick.type='button';pick.className='sequence-pick';pick.setAttribute('aria-label','手順'+(i+1)+'を確認 '+title);pick.setAttribute('aria-pressed','false');
-    pick.textContent=number.textContent;number.replaceWith(pick);picks.push(pick);
-    pick.addEventListener('click',()=>select(i,true));
-    pick.addEventListener('focus',()=>select(i,true));
-    pick.addEventListener('keydown',event=>{
-      let next=i;
-      if(event.key==='ArrowRight'||event.key==='ArrowDown')next=(i+1)%items.length;
-      else if(event.key==='ArrowLeft'||event.key==='ArrowUp')next=(i+items.length-1)%items.length;
-      else return;
-      event.preventDefault();picks[next].focus();
-    });
-    item.classList.add('decision-item');
-  });
-  group.classList.add('decision-sequence');
-  group.setAttribute('aria-label',group.classList.contains('steps')?'相談から手続きまでの順序':'判断のための確認項目');
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){select(0);return}
-  if(group.classList.contains('steps')){
-    // As each stage reaches the reading position, its number and the connecting rail advance.
-    let scheduled=false;
-    function followReadingPosition(){
-      scheduled=false;if(userSelected)return;
-      const viewport=window.innerHeight,readingLine=viewport*.45;
-      const candidates=items.map((item,i)=>({i,rect:item.getBoundingClientRect()})).filter(x=>x.rect.bottom>90&&x.rect.top<viewport*.85);
-      if(!candidates.length)return;
-      candidates.sort((a,b)=>Math.abs(a.rect.top+a.rect.height*.35-readingLine)-Math.abs(b.rect.top+b.rect.height*.35-readingLine));
-      select(candidates[0].i);
-    }
-    window.addEventListener('scroll',()=>{if(!scheduled){scheduled=true;requestAnimationFrame(followReadingPosition)}},{passive:true});
-    window.addEventListener('resize',followReadingPosition);
-    followReadingPosition();
-  }else if('IntersectionObserver' in window){
-    const tour=new IntersectionObserver(entries=>{
-      entries.forEach(entry=>{if(!entry.isIntersecting)return;tour.disconnect();if(userSelected)return;
-        select(0);items.slice(1).forEach((_,i)=>timers.push(setTimeout(()=>{if(!userSelected)select(i+1)},(i+1)*1100)));
-      });
-    },{threshold:.3});
-    tour.observe(group);
-  }else select(0);
+// One quiet entrance per item. No selection, timers or persistent emphasis.
+const gentleItems=[...document.querySelectorAll('.cards article,.steps li')];
+const reduceEntrance=window.matchMedia('(prefers-reduced-motion: reduce)');
+if('IntersectionObserver' in window && !reduceEntrance.matches){
+ const entrance=new IntersectionObserver(entries=>{entries.forEach(entry=>{
+  if(!entry.isIntersecting)return;
+  entrance.unobserve(entry.target);
+  if(reduceEntrance.matches || !entry.target.animate)return;
+  entry.target.animate([{transform:'translateX(-14px)',opacity:.65},{transform:'translateX(0)',opacity:1}],{duration:950,easing:'cubic-bezier(.2,.65,.3,1)'});
+ })},{threshold:.08});
+ gentleItems.forEach(item=>entrance.observe(item));
+ reduceEntrance.addEventListener('change',event=>{if(event.matches){entrance.disconnect();gentleItems.forEach(item=>item.getAnimations().forEach(animation=>animation.cancel()))}});
 }
-document.querySelectorAll('.steps,.cards').forEach(enhanceDecisionSequence);
